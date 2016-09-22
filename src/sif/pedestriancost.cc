@@ -197,28 +197,23 @@ class PedestrianCost : public DynamicCost {
    * mode used by the costing method. Function/functor is also used to filter
    * edges not usable / inaccessible by pedestrians.
    */
-virtual const EdgeFilter GetEdgeFilter() const {
-    // Throw back a lambda that checks the access for this type of costing
-    auto access_mask = access_mask_;
-    return [access_mask](const baldr::DirectedEdge* edge) {
-      if (edge->trans_up() || edge->trans_down() ||
-          edge->use() >= Use::kRail ||
-         !(edge->forwardaccess() & access_mask))
-        return 0.0f;
-      else {
-        // TODO - use classification/use to alter the factor
-        return 1.0f;
-      }
-    };
-  }
+   virtual const EdgeFilter GetEdgeFilter() const {
+     // Throw back a lambda that checks the access for this type of costing
+     auto access_mask = access_mask_;
+     return [access_mask](const baldr::DirectedEdge* edge) {
+       return !(edge->trans_up() || edge->trans_down() ||
+           edge->use() >= Use::kRail ||
+          !(edge->forwardaccess() & access_mask));
+     };
+   }
 
- virtual const NodeFilter GetNodeFilter() const {
-    //throw back a lambda that checks the access for this type of costing
-    auto access_mask = access_mask_;
-    return [access_mask](const baldr::NodeInfo* node){
-      return !(node->access() & access_mask);
-    };
-  }
+   virtual const NodeFilter GetNodeFilter() const {
+     //throw back a lambda that checks the access for this type of costing
+     auto access_mask = access_mask_;
+     return [access_mask](const baldr::NodeInfo* node){
+       return !(node->access() & access_mask);
+     };
+   }
 
   /**
    * Returns a function/functor to be used in location searching which will
