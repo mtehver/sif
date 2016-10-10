@@ -61,12 +61,6 @@ class DynamicCost {
   virtual ~DynamicCost();
 
   /**
-   * Does the costing allow hierarchy transitions?
-   * @return  Returns true if the costing model allows hierarchy transitions).
-   */
-  virtual bool AllowTransitions() const;
-
-  /**
    * Does the costing method allow multiple passes (with relaxed
    * hierarchy limits).
    * @return  Returns true if the costing model allows multiple passes.
@@ -287,17 +281,6 @@ class DynamicCost {
    * Relax hierarchy limits.
    */
   void RelaxHierarchyLimits(const float factor, const float expansion_within_factor);
-
-  /**
-   * Do not transition up to highway level - remain on arterial. Used as last
-   * resort.
-   */
-  void DisableHighwayTransitions();
-
-  /**
-   * Reset hierarchy limits.
-   */
-  void ResetHierarchyLimits();
 
   /**
    * Checks if we should exclude or not.
