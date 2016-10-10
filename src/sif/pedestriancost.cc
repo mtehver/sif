@@ -278,6 +278,11 @@ class PedestrianCost : public DynamicCost {
 // not present, set the default.
 PedestrianCost::PedestrianCost(const boost::property_tree::ptree& pt)
     : DynamicCost(pt, TravelMode::kPedestrian) {
+  // Set hierarchy to allow unlimited transitions
+  for (auto& h : hierarchy_limits_) {
+    h.max_up_transitions = kUnlimitedTransitions;
+  }
+
   allow_transit_connections_ = false;
 
   // Get the pedestrian type - enter as string and convert to enum
@@ -406,6 +411,7 @@ bool PedestrianCost::Allowed(const baldr::DirectedEdge* edge,
 
   if (!(edge->forwardaccess() & access_mask_) ||
        (edge->surface() > minimal_allowed_surface_) ||
+        edge->is_shortcut() ||
  //      (edge->max_up_slope() > max_grade_ || edge->max_down_slope() > max_grade_) ||
       ((pred.path_distance() + edge->length()) > max_distance_)) {
     return false;
@@ -432,6 +438,7 @@ bool PedestrianCost::AllowedReverse(const baldr::DirectedEdge* edge,
   // multimodal routes).
   if (!(opp_edge->forwardaccess() & access_mask_) ||
        (opp_edge->surface() > minimal_allowed_surface_) ||
+        opp_edge->is_shortcut() ||
  //      (opp_edge->max_up_slope() > max_grade_ || opp_edge->max_down_slope() > max_grade_) ||
         opp_edge->use() == Use::kTransitConnection) {
     return false;

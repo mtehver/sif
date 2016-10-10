@@ -371,6 +371,11 @@ BicycleCost::BicycleCost(const boost::property_tree::ptree& pt)
                              1.0f,  1.0f, 1.0f,  1.0f,
                              1.05f, 1.1f, 1.15f, 1.2f,
                              1.25f, 1.3f, 1.4f,  1.5f } {
+  // Set hierarchy to allow unlimited transitions
+  for (auto& h : hierarchy_limits_) {
+    h.max_up_transitions = kUnlimitedTransitions;
+  }
+
   // Transition penalties (similar to auto)
   maneuver_penalty_ = pt.get<float>("maneuver_penalty",
                                     kDefaultManeuverPenalty);
@@ -496,8 +501,9 @@ bool BicycleCost::Allowed(const baldr::DirectedEdge* edge,
 
   // Check bicycle access and turn restrictions. Bicycles should obey
   // vehicular turn restrictions. Allow Uturns at dead ends only.
-  // Skip impassable edges.
+  // Skip impassable edges and shortcut edges.
   if (!(edge->forwardaccess() & kBicycleAccess) ||
+        edge->is_shortcut() ||
       (pred.opp_local_idx() == edge->localedgeidx() && !pred.deadend()) ||
       (pred.restrictions() & (1 << edge->localedgeidx()))) {
     return false;
@@ -518,6 +524,7 @@ bool BicycleCost::AllowedReverse(const baldr::DirectedEdge* edge,
 
   // Check access, U-turn (allow at dead-ends), and simple turn restriction.
   if (!(opp_edge->forwardaccess() & kBicycleAccess) ||
+        opp_edge->is_shortcut() ||
        (pred.opp_local_idx() == edge->localedgeidx() && !pred.deadend()) ||
        (opp_edge->restrictions() & (1 << pred.opp_local_idx()))) {
     return false;
